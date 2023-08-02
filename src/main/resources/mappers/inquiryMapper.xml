@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javawebS.dao.InquiryDAO">
+  <select id="totRecCnt" resultType="int">
+    <if test="part == '전체'">
+      <if test="mid =='admin'">
+        select count(*) from inquiry2;
+      </if>
+      <if test="mid !='admin'">
+        select count(*) from inquiry2 where mid=#{mid};
+      </if>
+    </if>
+    <if test="part != '전체'">
+      <if test="mid =='admin'">
+        select count(*) from inquiry2 where part = #{part};
+      </if>
+      <if test="mid !='admin'">
+        select count(*) from inquiry2 where part = #{part} and mid=#{mid};
+      </if>
+    </if>
+  </select>
+  
+  <select id="getInquiryList" resultType="com.spring.javawebS.vo.InquiryVO">
+    <if test="part == '전체'">
+      <if test="mid =='admin'">
+        select * from inquiry2 order by idx desc limit #{startIndexNo}, #{pageSize};
+      </if>
+      <if test="mid !='admin'">
+        select * from inquiry2 where mid=#{mid} order by idx desc limit #{startIndexNo}, #{pageSize};
+      </if>
+    </if>
+    <if test="part != '전체'">
+      <if test="mid =='admin'">
+        select * from inquiry2 where part = #{part} order by idx desc limit #{startIndexNo}, #{pageSize};
+      </if>
+      <if test="mid !='admin'">
+        select * from inquiry2 where part = #{part} and mid=#{mid} order by idx desc limit #{startIndexNo}, #{pageSize};
+      </if>
+    </if>
+  </select>
+  
+  <select id="getInquiryView" resultType="com.spring.javawebS.vo.InquiryVO">
+    select * from inquiry2 where idx = #{idx};
+  </select>
+  
+  <select id="getInquiryReply" resultType="com.spring.javawebS.vo.InquiryReplyVO">
+    select * from inquiry2Reply where inquiryIdx = #{idx};
+  </select>
+  
+  
+  
+  <insert id="setInquiryInputOk">
+    insert into inquiry2 values (default,#{vo.mid},#{vo.title},#{vo.part},default,#{vo.jumunNo},#{vo.content},#{vo.FName},#{vo.FSName},default);
+  </insert>
+  
+  
+  
+  <update id="setInquiryUpdate">
+    <if test="vo.FName == ''">  <!-- 앞에서 vo의 FName를 받았기에 이곳에서는 필요없음 -->
+      update inquiry2 set title=#{vo.title},part=#{vo.part},wDate=now(),jumunNo=#{vo.jumunNo},content=#{vo.content} where idx=#{vo.idx};
+    </if>
+    <if test="vo.FName != ''">
+      update inquiry2 set title=#{vo.title},part=#{vo.part},wDate=now(),jumunNo=#{vo.jumunNo},content=#{vo.content},fName=#{vo.FName},FSName=#{vo.FSName} where idx=#{vo.idx};
+    </if>
+  </update>
+  
+  
+  <delete id="setInquiryDelete">
+    delete from inquiry2 where idx = #{idx};
+  </delete>
+  
+</mapper>

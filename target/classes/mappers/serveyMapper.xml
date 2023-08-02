@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.spring.javawebS.dao.ServeyDAO">
+  <select id="getServeys" resultType="com.spring.javawebS.vo.ServeyVO">
+		<if test="showSw!=99">
+			select * from servey where showSw=${showSw} order by idx desc;
+		</if>
+		<if test="showSw==99">
+			select * from servey order by idx desc;
+		</if>
+	</select>
+	
+	<select id="getServey" resultType="com.spring.javawebS.vo.ServeyVO">
+		select * from servey where idx=${idx};
+	</select>
+	
+	<select id="getServeyQuestions" resultType="com.spring.javawebS.vo.ServeyQuestionVO">
+		select * from serveyQuestion where sIdx=${sIdx};
+	</select>
+	
+	<select id="getServeyAnswers" resultType="com.spring.javawebS.vo.ServeyAnswerVO">
+		select *,(select count(*) from serveyRealAnswer where aIdx=a.idx <if test="part!=''"> and bIdx in (select idx from serveyBasic where ${part}=#{smallPart})</if> group by aIdx ) as realAnswerCnt from serveyAnswer a where sIdx = ${sIdx};
+	</select>
+	
+	<select id="getLastIdx" resultType="int">
+		select idx from servey order by idx desc limit 1;
+	</select>
+	
+	<select id="getLastBasicIdx" resultType="int">
+		select idx from serveyBasic order by idx desc limit 1;
+	</select>
+	
+	<select id="getRealAnswer" resultType="com.spring.javawebS.vo.ServeyRealAnswerVO">
+		select * from serveyRealAnswer where sIdx=#{idx} <if test="part!=''"> and bIdx in (select idx from serveyBasic where ${part}=#{smallPart})</if>;
+	</select>
+	
+	<select id="getRealAnswerSmallPart" resultType="String">
+		select ${part} from serveyBasic <if test="part!=''"> group by ${part}</if>;
+	</select>
+	
+	
+	
+	<insert id="setServeyInput">
+		insert into servey values(default,#{vo.title},now(),#{vo.startDate},#{vo.endDate},#{vo.showSw});
+	</insert>
+	
+	<insert id="setServeyQuesionInput">
+		insert into serveyQuestion values (default,#{vo.SIdx},#{vo.qcontent},#{vo.answerSw});
+	</insert>
+	
+	<insert id="setServeyAnswerInput">
+		insert into serveyAnswer values (default,#{vo.SIdx},#{vo.QIdx},#{vo.acontent});
+	</insert>
+	
+	<insert id="setBasicServeyInput">
+		insert into serveyBasic values(default,#{vo.gender},#{vo.age},#{vo.address});
+	</insert>
+	
+	<insert id="setServeyRealAnswerInput">
+		insert into serveyRealAnswer values (default, #{vo.BIdx}, #{vo.SIdx}, #{vo.QIdx}, #{vo.AIdx}, #{vo.detailAnswer});
+	</insert>
+	
+	
+	
+	<update id="setServeyQuestionUpdate">
+		update serveyQuestion set qcontent =#{vo.qcontent} where idx=#{vo.idx};
+	</update>
+	
+	<update id="setServeySwAutoUpdate">
+		update servey set showSw=1 where now()>=startDate and endDate>now();
+		update servey set showSw=0 where startDate>now() or now()>=endDate;
+	</update>
+	
+	<update id="setServeyUpdate">
+		update servey set title=#{vo.title},showSw=#{vo.showSw},startDate=#{vo.startDate},endDate =#{vo.endDate} where idx =#{vo.idx};
+	</update>
+	
+	
+	<delete id="setServeyAnswerDelete">
+		delete from serveyAnswer where idx =#{idx};
+	</delete>
+	
+	<delete id="setServeyQuestionDelete">
+		delete from serveyQuestion where idx =#{idx};
+	</delete>
+	
+</mapper>
